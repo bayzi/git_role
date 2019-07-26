@@ -1,0 +1,12 @@
+[user]
+	email = {{ git_user_email }}
+	name = {{ git_username }}
+
+[alias]
+	aliases = !git config --get-regexp 'alias.*' | colrm 1 6 | sed 's/[ ]/ = /' | sort    # list all aliases
+	st = status
+	ci = commit
+	cp = cherry-pick
+	br = branch
+	co = checkout
+

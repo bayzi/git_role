@@ -1,0 +1,43 @@
+---
+# tasks file for git
+
+- name: Ensure git is installed.
+  package:
+    name: git
+    state: present
+    
+- name: place git configuration
+  template:
+    src: gitconfig.j2
+    dest: "{{ ansible_env.HOME }}/.gitconfig"
+  when:
+    - git_user_email is defined
+
+- name: copy ssh key to the sandbox
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ ansible_env.HOME }}/.ssh/{{ item.dest }}"
+    owner: "{{ lookup('env','USER') }}"
+    group: "{{ lookup('env','USER') }}"
+    mode: 0400
+  with_items:
+    - { src: id_rsa , dest: id_rsa}
+    - { src: id_rsa.pub , dest: id_rsa.pub}
+
+- block:
+    - name: create repository_destination
+      file:
+        path: "{{ git_repository.dest }}"
+        state: directory
+        owner: "{{ lookup('env','USER') }}"
+        group: "{{ lookup('env','USER') }}"
+    - debug: var=git_repository.dest
+    - name: clone repos
+      git:
+        repo: "{{ git_repository.repo }}"
+        dest: "{{ git_repository.dest }}"
+        key_file: "{{ ansible_env.HOME }}/.ssh/id_rsa"
+        accept_hostkey: yes
+        force: yes
+  when:
+    - git_repository.repo != '' and git_repository.dest != ''
