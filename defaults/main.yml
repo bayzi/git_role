@@ -1,7 +1,7 @@
 ---
 # defaults file for git
 
-git_user: ""
+role_user: ""
 git_user_email: "{{ git_user_email }}"
 git_username: "{{ git_user_email.split('@')[0] }}"
 git_repository:
