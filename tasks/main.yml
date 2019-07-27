@@ -14,7 +14,7 @@
 - name: place git configuration
   template:
     src: gitconfig.j2
-    dest: "{{ ansible_env.HOME }}/.gitconfig"
+    dest: "/home/{{ git_user }}/.gitconfig"
     owner: "{{ git_user }}"
     group: "{{ git_user }}"
   when:
@@ -23,7 +23,7 @@
 - name: copy ssh key to the sandbox
   copy:
     src: "{{ item.src }}"
-    dest: "{{ ansible_env.HOME }}/.ssh/{{ item.dest }}"
+    dest: "/home/{{ git_user }}/.ssh/{{ item.dest }}"
     owner: "{{ git_user }}"
     group: "{{ git_user }}"
     mode: 0400
@@ -43,7 +43,7 @@
       git:
         repo: "{{ git_repository.repo }}"
         dest: "{{ git_repository.dest }}"
-        key_file: "{{ ansible_env.HOME }}/.ssh/id_rsa"
+        key_file: "/home/{{ git_user }}/.ssh/id_rsa"
         accept_hostkey: yes
         force: yes
   when:
