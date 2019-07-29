@@ -11,6 +11,7 @@
     role_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
   when: role_user == ''
 
+<<<<<<< HEAD
 - block:
     - name: Set git username
       set_fact:
@@ -30,4 +31,19 @@
   when:
     - git_user_email is defined
     - '"@" in git_user_email'
+=======
+- name: place git configuration
+  template:
+    src: gitconfig.j2
+    dest: "/home/{{ role_user }}/.gitconfig"
+    owner: "{{ role_user }}"
+    group: "{{ role_user }}"
+  when:
+    - git_user_email is defined
+
+- name: generate ssh key
+  command: ssh-keygen -q -t rsa -b 4096 -C {{ email }} -f /home/{{ role_user }}/.ssh/id_rsa_git
+  args:
+    creates: /home/{{ role_user }}/.ssh/id_rsa_git
+>>>>>>> 24fa825e653107e7da8646995563dfb7357d6816
 
