@@ -11,40 +11,23 @@
     role_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
   when: role_user == ''
 
-- name: place git configuration
-  template:
-    src: gitconfig.j2
-    dest: "/home/{{ role_user }}/.gitconfig"
-    owner: "{{ role_user }}"
-    group: "{{ role_user }}"
-  when:
-    - git_user_email is defined
-
-- name: copy ssh key to the sandbox
-  copy:
-    src: "{{ item.src }}"
-    dest: "/home/{{ role_user }}/.ssh/{{ item.dest }}"
-    owner: "{{ role_user }}"
-    group: "{{ role_user }}"
-    mode: 0400
-  with_items:
-    - { src: id_rsa , dest: id_rsa}
-    - { src: id_rsa.pub , dest: id_rsa.pub}
-
 - block:
-    - name: create repository_destination
-      file:
-        path: "{{ git_repository.dest }}"
-        state: directory
+    - name: Set git username
+      set_fact:
+        git_username: "{{ git_user_email.split('@')[0] }}"
+
+    - name: place git configuration
+      template:
+        src: gitconfig.j2
+        dest: "/home/{{ role_user }}/.gitconfig"
         owner: "{{ role_user }}"
         group: "{{ role_user }}"
-    - debug: var=git_repository.dest
-    - name: clone repos
-      git:
-        repo: "{{ git_repository.repo }}"
-        dest: "{{ git_repository.dest }}"
-        key_file: "/home/{{ role_user }}/.ssh/id_rsa"
-        accept_hostkey: yes
-        force: yes
+
+    - name: generate ssh key
+      command: ssh-keygen -q -t rsa -b 4096 -C {{ git_user_email }} -f /home/{{ role_user }}/.ssh/id_rsa_git
+      args:
+        creates: /home/{{ role_user }}/.ssh/id_rsa_git
   when:
-    - git_repository.repo != '' and git_repository.dest != ''
+    - git_user_email is defined
+    - '"@" in git_user_email'
+
